@@ -8,19 +8,18 @@ export default function Dewy() {
     const targetGaze = useRef({ x: 0, y: 0 });
     const isEngaged = useRef(false);
     const waveTracking = useRef({
-        lastX: 0,
+        lastX: null as number | null,
         direction: 0,
+        distanceInDirection: 0,
         reversals: 0,
-        lastReversalX: 0,
-        lastReversalTime: 0,
+        startedAt: 0,
     });
     const lastPointer = useRef({
         x: 0,
         y: 0,
         time: 0,
     });
-
-const waveCooldown = useRef(0);
+    const waveCooldown = useRef(0);
 
     // blinking on timer + random time
     useEffect(() => {
@@ -53,46 +52,66 @@ const waveCooldown = useRef(0);
         const now = performance.now();
         const tracking = waveTracking.current;
 
+        const minDistance = 35;
+        const maxGestureTime = 1800;
+        const requiredReversals = 3;
+
+        if (now < waveCooldown.current) return;
+
+        // First movement for establishing starting point
+        if (tracking.lastX === null) {
+            tracking.lastX = x;
+            tracking.startedAt = now;
+            return;
+        }
+
         const movement = x - tracking.lastX;
         tracking.lastX = x;
 
         //ignoring tiny movements
         if (Math.abs(movement) < 2) return;
 
+        // reset if gesture is taking too long
+        if (now -tracking.startedAt > maxGestureTime) {
+            tracking.direction = 0;
+            tracking.distanceInDirection = 0;
+            tracking.reversals = 0;
+            tracking.startedAt = now;
+        }
+
         const direction = Math.sign(movement);
 
         //start tracking first mouse direction
         if (tracking.direction === 0) {
             tracking.direction = direction;
-            tracking.lastReversalX = x;
-            tracking.lastReversalTime = now;
-            return;
         }
 
-        // detecting change in direction
-        if (direction !== tracking.direction) {
-            const distance = Math.abs(x - tracking.lastReversalX);
-
-            if (distance >= 35) {
-                //reset if too slow
-                if (now - tracking.lastReversalTime > 1200) {
-                    tracking.reversals = 0;
-                }
-
+        if (direction === tracking.direction) {
+            tracking.distanceInDirection += Math.abs(movement);
+        } else {
+            if (tracking.distanceInDirection >= minDistance) {
                 tracking.reversals++;
-                tracking.lastReversalTime = now;
-                tracking.lastReversalX = x;
                 tracking.direction = direction;
+                tracking.distanceInDirection = Math.abs(movement);
             }
         }
 
-        if (tracking.reversals >= 3 && now > waveCooldown.current) {
-            console.log("dewy detected a wave");
+        if (tracking.reversals >= requiredReversals) {
+            console.log("Dewy detected a wave!");
 
             waveCooldown.current = now + 2500;
-            tracking.reversals = 0;
+            waveTracking.current = {
+                lastX: null,
+                direction: 0,
+                distanceInDirection: 0,
+                reversals: 0,
+                startedAt: 0,
+            };
+
         }
-    };
+
+        
+    }
 
     // eye movement towards cursor
     useEffect(() => {
@@ -138,11 +157,11 @@ const waveCooldown = useRef(0);
                 detectWave(event.clientX);
             } else {
                 waveTracking.current = {
-                    lastX: 0,
+                    lastX: null,
                     direction: 0,
+                    distanceInDirection: 0,
                     reversals: 0,
-                    lastReversalX: 0,
-                    lastReversalTime: 0,
+                    startedAt: 0,
                 };
             }
 
@@ -167,17 +186,16 @@ const waveCooldown = useRef(0);
                 return;
             }
 
+            // cursor is far away, dewy relaxes
+            if (distance > trackingRadius || distance === 0) {
+                targetGaze.current = { x: 0, y: 0 };
+                return;
+            }
+            
             //detect waves but ignore rapid cursor movement
             const fastMovementThreshold = 0.8;
 
             if (pointerSpeed > fastMovementThreshold) {
-            targetGaze.current = { x: 0, y: 0 };
-            return;
-            }
-
-            // cursor is far away, dewy relaxes
-            if (distance > trackingRadius || distance === 0) {
-                targetGaze.current = { x: 0, y: 0 };
                 return;
             }
 
@@ -191,8 +209,8 @@ const waveCooldown = useRef(0);
             const directionY = dy / distance;
 
             targetGaze.current = {
-            x: directionX * (directionX < 0 ? maxLeft : maxRight),
-            y: directionY * (directionY < 0 ? maxUp : maxDown),
+                x: directionX * (directionX < 0 ? maxLeft : maxRight),
+                y: directionY * (directionY < 0 ? maxUp : maxDown),
             };
         };
 
