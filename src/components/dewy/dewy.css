@@ -1,0 +1,77 @@
+.dewy-container {
+  position: relative;
+  width: 240px;
+  height: 260px;
+  margin: 4rem 4rem 0;
+}
+
+.dewy {
+  position: relative;
+  z-index: 1;
+  animation: float 3s ease-in-out infinite;
+}
+
+.dewy img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.dewy-glow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 140px;
+  height: 35px;
+  border-radius: 50%;
+  background: #68d3d1;
+  filter: blur(22px);
+  transform: translateX(-50%);
+  animation: glow 3s ease-in-out infinite;
+}
+
+.dewy-arm {
+  opacity: 0;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    opacity: 0.35;
+    scale: 1;
+  }
+
+  50% {
+    opacity: 0.15;
+    scale: 1.2;
+  }
+}
+
+/* BLINKING EYES */
+.dewy-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 120ms ease-in-out;
+}
+
+.dewy-eye.is-blinking {
+  transform: scaleY(0.09);
+}
+
+.dewy-eye.is-blinking .dewy-highlight {
+  opacity: 0;
+}
+
+.dewy-highlight {
+  transition: opacity 80ms ease-out;
+}
+
