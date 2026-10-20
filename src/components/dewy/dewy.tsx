@@ -5,6 +5,8 @@ import "./dewy.css";
 export default function Dewy() {
     const [isBlinking, setIsBlinking] = useState(false);
     const [gaze, setGaze] = useState({ x: 0, y: 0 });
+    const [isWaving, setIswaving] = useState(false);
+    const [isHappy, setIsHappy] = useState(false);
     const targetGaze = useRef({ x: 0, y: 0 });
     const isEngaged = useRef(false);
     const waveTracking = useRef({
@@ -20,6 +22,17 @@ export default function Dewy() {
         time: 0,
     });
     const waveCooldown = useRef(0);
+    const wavingRef = useRef(false);
+    const wavingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // dewy waving timer
+    useEffect(() => {
+        return () => {
+            if (wavingTimeout.current !== null) {
+                clearTimeout(wavingTimeout.current);
+            }
+        };
+    }, []);
 
     // blinking on timer + random time
     useEffect(() => {
@@ -46,6 +59,28 @@ export default function Dewy() {
             clearTimeout(reopenTimeout);
         };
     }, []);
+
+    // respond to user waving
+    const respondToWave = () => {
+        if (wavingRef.current) return;
+
+        wavingRef.current = true;
+        
+        setIsHappy(true);
+        wavingTimeout.current = setTimeout(() => {
+            setIswaving(true);
+
+            wavingTimeout.current = setTimeout(() => {
+                setIswaving(false);
+                wavingRef.current = false;
+
+                wavingTimeout.current = setTimeout(() => {
+                    setIsHappy(false);
+                    wavingRef.current = false;
+                }, 700);
+            }, 1800);
+        }, 500);
+    };
 
     // detect user waving
     const detectWave = (x: number) => {
@@ -100,6 +135,9 @@ export default function Dewy() {
             console.log("Dewy detected a wave!");
 
             waveCooldown.current = now + 2500;
+
+            respondToWave();
+
             waveTracking.current = {
                 lastX: null,
                 direction: 0,
@@ -107,10 +145,7 @@ export default function Dewy() {
                 reversals: 0,
                 startedAt: 0,
             };
-
         }
-
-        
     }
 
     // eye movement towards cursor
@@ -261,29 +296,185 @@ export default function Dewy() {
   return (
     <div className="dewy-container">
       <div className="dewy">
-        <svg role="img" aria-label="Dewy the Dewdrop" viewBox="0 0 2263 1470" fill="none" xmlns="http://www.w3.org/2000/svg">
-        
-        <path className="dewy-arm dewy-arm--right" d="M2004.74 966.53H1588V1100C1715.92 1092.53 1988.21 1042.03 2053.98 1042.03C2136.19 1042.03 2091.42 1051.26 2135.37 1064.45C2179.33 1077.64 2242 1054.83 2242 1001.42C2242 958.691 2066.87 962.024 2004.74 966.53Z" fill="#00CEC9"/>
-        <path className="dewy-arm dewy-arm--left" d="M221.91 1114.96L646.885 990.981L702.12 1141.89C569.295 1180.93 272.259 1224.9 205.563 1249.31C122.193 1279.83 179.791 1292.7 140.674 1323.93C101.558 1355.16 27.3081 1315.96 5.20439 1255.57C-12.4786 1207.26 157.037 1132.93 221.91 1114.96Z" fill="#00CEC9"/> 
-        <path className="dewy-body" d="M1205.78 27.9111C1166.44 -63.0868 1416.87 165.336 1509.08 282.646C1591.63 375.569 1658.31 556.073 1695.28 863.014C1695.28 1194.6 1402.03 1463.41 1040.28 1463.41C678.535 1463.41 473.281 1194.6 473.281 863.014C473.281 531.423 779.781 596.411 1036.78 359.911C1043.57 353.668 1050.38 347.542 1057.23 341.544C1142.08 241.951 1223.75 69.4678 1205.78 27.9111Z" fill="#81ECEC"/>
-        <path className="dewy-mouth" d="M1031 1234C1047.83 1266.17 1094.7 1311.2 1147.5 1234" strokeWidth="17" stroke="#00807C"/>
-        <g className={`dewy-eye ${isBlinking ? "is-blinking" : ""}`}>
-            <path className="dewy-eye--right" d="M1374 979C1374 1085.04 1342.5 1171 1252 1171C1161.5 1171 1130 1085.04 1130 979C1130 872.961 1158.5 787 1252 787C1345.5 787 1374 872.961 1374 979Z" fill="#424242"/>
-            <g className="dewy-gaze" transform={`translate(${gaze.x} ${gaze.y})`}>
-                <ellipse className="dewy-highlight dewy-highlight--right" cx="1293" cy="925" rx="41" ry="61" fill="white"/>
+        <svg
+            role="img"
+            aria-label="Dewy the Dewdrop"
+            viewBox="0 0 2459 1474"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            {/* ARMS — behind the body */}
+
+            <path
+                className={`dewy-arm dewy-arm--right ${isWaving ? "is-waving" : ""}`}
+                d="M2207.74 968.53H1791H1711C1658 968.53 1631 1005.06 1631 1044.03C1631 1083 1666.5 1102 1694 1102H1791C1861.5 1094.5 2191.21 1044.03 2256.98 1044.03C2339.19 1044.03 2294.42 1053.26 2338.37 1066.45C2382.33 1079.64 2445 1056.83 2445 1003.42C2445 960.691 2269.87 964.024 2207.74 968.53Z"
+                fill="#00CEC9"
+            />
+
+            <path
+                className="dewy-arm dewy-arm--left"
+                d="M226.446 1186.54L598.058 1057.91L669.395 1033.21C716.656 1016.86 753.339 1044.94 766.784 1083.79C780.23 1122.63 755.131 1152.53 730.609 1161.02L644.112 1190.96C578.658 1205.24 267.232 1256.7 208.587 1277C135.28 1302.38 178.385 1297.76 143.742 1324.47C109.099 1351.19 45.3426 1347.8 26.9126 1294.55C12.1687 1251.96 169.488 1201.22 226.446 1186.54Z"
+                fill="#00CEC9"
+            />
+
+            {/* BODY */}
+
+            <path
+                className="dewy-body"
+                d="M1330.78 29.9111C1291.44 -61.0868 1541.87 167.336 1634.08 284.646C1716.63 377.569 1783.31 558.073 1820.28 865.014C1820.28 1196.6 1527.03 1465.41 1165.28 1465.41C803.535 1465.41 598.281 1196.6 598.281 865.014C598.281 533.423 904.781 598.411 1161.78 361.911C1168.57 355.668 1175.38 349.542 1182.23 343.544C1267.08 243.951 1348.75 71.4678 1330.78 29.9111Z"
+                fill="#81ECEC"
+            />
+
+            {/* BLUSH — appears when Dewy is happy */}
+
+            <g className={`dewy-blush ${isHappy ? "is-visible" : ""}`}>
+                <ellipse
+                    cx="1511"
+                    cy="1202"
+                    rx="151"
+                    ry="78"
+                    fill="url(#paint0_radial_3509_2)"
+                    fillOpacity="0.45"
+                />
+                <ellipse
+                    cx="946.5"
+                    cy="1202"
+                    rx="150.5"
+                    ry="78"
+                    fill="url(#paint1_radial_3509_2)"
+                    fillOpacity="0.45"
+                />
             </g>
-        </g>
-        <g className={`dewy-eye ${isBlinking ? "is-blinking" : ""}`}>
-        <path className="dewy-eye--left" d="M1038 979C1038 1085.04 1006.5 1171 916 1171C825.5 1171 794 1085.04 794 979C794 872.961 822.5 787 916 787C1009.5 787 1038 872.961 1038 979Z" fill="#424242"/>
-        <g className="dewy-gaze" transform={`translate(${gaze.x} ${gaze.y})`}>
-            <ellipse className="dewy-highlight dewy-highlight--left" cx="957" cy="925" rx="41" ry="61" fill="white"/>
-        </g>
-        </g>
-        <defs>
-        <clipPath id="clip0_3509_2">
-        <rect fill="white"/>
-        </clipPath>
-        </defs>
+
+            {/* NORMAL EXPRESSION */}
+
+            <g className="dewy-expression">
+
+                {/* Normal mouth */}
+                <path
+                    className="dewy-mouth"
+                    d="M1151 1236C1167.83 1268.17 1214.7 1313.2 1267.5 1236"
+                    strokeWidth="17"
+                    stroke="#00807C"
+                />
+
+                {/* Right eye */}
+                <g className={`dewy-eye ${isBlinking ? "is-blinking" : ""}`}>
+                    <path
+                        className="dewy-eye--right"
+                        d="M1499 981C1499 1087.04 1467.5 1173 1377 1173C1286.5 1173 1255 1087.04 1255 981C1255 874.961 1283.5 789 1377 789C1470.5 789 1499 874.961 1499 981Z"
+                        fill="#424242"
+                    />
+                    <g
+                        className="dewy-gaze"
+                        transform={`translate(${gaze.x} ${gaze.y})`}
+                    >
+                        <ellipse
+                            className="dewy-highlight dewy-highlight--right"
+                            cx="1418"
+                            cy="927"
+                            rx="41"
+                            ry="61"
+                            fill="white"
+                        />
+                    </g>
+                </g>
+
+                {/* Left eye */}
+                <g className={`dewy-eye ${isBlinking ? "is-blinking" : ""}`}>
+                    <path
+                        className="dewy-eye--left"
+                        d="M1163 981C1163 1087.04 1131.5 1173 1041 1173C950.5 1173 919 1087.04 919 981C919 874.961 947.5 789 1041 789C1134.5 789 1163 874.961 1163 981Z"
+                        fill="#424242"
+                    />
+                    <g
+                        className="dewy-gaze"
+                        transform={`translate(${gaze.x} ${gaze.y})`}
+                    >
+                        <ellipse
+                            className="dewy-highlight dewy-highlight--left"
+                            cx="1082"
+                            cy="927"
+                            rx="41"
+                            ry="61"
+                            fill="white"
+                        />
+                    </g>
+                </g>
+            </g>
+
+            {/* SHY / HAPPY EXPRESSION */}
+
+            <g className="dewy-expression is-hidden">
+
+                {/* Happy mouth */}
+                <path
+                    className="dewy-mouth--happy"
+                    d="M1140 1210.5C1171 1303 1252 1304 1278 1210.5"
+                    strokeWidth="17"
+                    stroke="#00807C"
+                />
+
+                {/* Left happy eye */}
+                <path
+                    className="dewy-eye--happy-left"
+                    d="M1184 989.5C1184 1075.93 1147.85 1146 1044 1146C940.148 1146 904 1075.93 904 989.5C904 903.067 936.705 833 1044 833C1151.3 833 1184 903.067 1184 989.5Z"
+                    fill="#424242"
+                />
+                <ellipse
+                    cx="1091"
+                    cy="945.5"
+                    rx="47"
+                    ry="49.5"
+                    fill="white"
+                />
+
+                {/* Right happy eye */}
+                <path
+                    className="dewy-eye--happy-right"
+                    d="M1275 990.5C1275 1076.93 1311.15 1147 1415 1147C1518.85 1147 1555 1076.93 1555 990.5C1555 904.067 1522.3 834 1415 834C1307.7 834 1275 904.067 1275 990.5Z"
+                    fill="#424242"
+                />
+                <ellipse
+                    cx="1462"
+                    cy="939.5"
+                    rx="47"
+                    ry="49.5"
+                    fill="white"
+                />
+            </g>
+
+            {/* ORIGINAL FIGMA BLUSH GRADIENTS */}
+
+            <defs>
+                <radialGradient
+                    id="paint0_radial_3509_2"
+                    cx="0"
+                    cy="0"
+                    r="1"
+                    gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(1511 1202) rotate(90) scale(78 151)"
+                >
+                    <stop stopColor="#FB06C6" stopOpacity="0.38" />
+                    <stop offset="0.25" stopColor="#E82ACC" stopOpacity="0.382" />
+                    <stop offset="0.769231" stopColor="#C076D9" stopOpacity="0.22" />
+                    <stop offset="1" stopColor="#81ECEC" stopOpacity="0.23" />
+                </radialGradient>
+
+                <radialGradient
+                    id="paint1_radial_3509_2"
+                    cx="0"
+                    cy="0"
+                    r="1"
+                    gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(946.5 1202) rotate(90) scale(78 150.5)"
+                >
+                    <stop stopColor="#FB06C6" stopOpacity="0.38" />
+                    <stop offset="0.25" stopColor="#E82ACC" stopOpacity="0.382" />
+                    <stop offset="0.769231" stopColor="#C076D9" stopOpacity="0.22" />
+                    <stop offset="1" stopColor="#81ECEC" stopOpacity="0.23" />
+                </radialGradient>
+            </defs>
         </svg>
       </div>
       <div className="dewy-glow" />
