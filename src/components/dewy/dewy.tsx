@@ -296,7 +296,7 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
             }
             
             //detect waves but ignore rapid cursor movement
-            const fastMovementThreshold = 0.8;
+            const fastMovementThreshold = 2;
 
             if (pointerSpeed > fastMovementThreshold) {
                 return;
