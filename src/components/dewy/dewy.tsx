@@ -18,6 +18,7 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
     const isEngaged = useRef(false);
     const waveTracking = useRef({
         lastX: null as number | null,
+        lastY: null as number | null,
         direction: 0,
         distanceInDirection: 0,
         reversals: 0,
@@ -144,7 +145,7 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
     };
 
     // detect user waving
-    const detectWave = (x: number) => {
+    const detectWave = (x: number, y: number) => {
         const now = performance.now();
         const tracking = waveTracking.current;
 
@@ -155,17 +156,27 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
         if (now < waveCooldown.current) return;
 
         // First movement for establishing starting point
-        if (tracking.lastX === null) {
+        if (tracking.lastX === null || tracking.lastY === null) {
             tracking.lastX = x;
+            tracking.lastY = y;
             tracking.startedAt = now;
             return;
         }
 
         const movement = x - tracking.lastX;
+        const verticalMovement = y - tracking.lastY!;
         tracking.lastX = x;
+        tracking.lastY = y;
 
         //ignoring tiny movements
-        if (Math.abs(movement) < 2) return;
+        if (Math.abs(verticalMovement) > Math.abs(movement) * 1.5 &&
+            Math.abs(verticalMovement) > 8
+    ) {
+            tracking.direction = 0;
+            tracking.distanceInDirection = 0;
+            tracking.reversals = 0;
+            return;
+        } 
 
         // reset if gesture is taking too long
         if (now -tracking.startedAt > maxGestureTime) {
@@ -201,6 +212,7 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
 
             waveTracking.current = {
                 lastX: null,
+                lastY: null,
                 direction: 0,
                 distanceInDirection: 0,
                 reversals: 0,
@@ -257,10 +269,11 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
                 (event.pointerType === "touch" && event.buttons > 0) ||
                 distance < waveRadius
             ) {
-                detectWave(event.clientX);
+                detectWave(event.clientX, event.clientY);
             } else {
                 waveTracking.current = {
                     lastX: null,
+                    lastY: null,
                     direction: 0,
                     distanceInDirection: 0,
                     reversals: 0,
@@ -322,6 +335,7 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
 
             waveTracking.current = {
                 lastX: null,
+                lastY: null,
                 direction: 0,
                 distanceInDirection: 0,
                 reversals: 0,
