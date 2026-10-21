@@ -1,14 +1,32 @@
 .dewy-container {
   position: relative;
-  width: 240px;
-  height: 260px;
-  margin: 4rem 4rem 0;
+  width: min(340px, 90vw);
+  aspect-ratio: 340 / 360;
+  margin: 0;
 }
 
 .dewy {
   position: relative;
   z-index: 1;
   animation: float 3s ease-in-out infinite;
+}
+
+.dewy-svg {
+    cursor: pointer;
+    transform-origin: center;
+    touch-action: none;
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.dewy-svg:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.dewy-svg:focus-visible {
+    outline: 2px solid #6489AA;
+    outline-offset: 4px;
 }
 
 .dewy img {
@@ -24,7 +42,7 @@
   width: 140px;
   height: 35px;
   border-radius: 50%;
-  background: #489694;
+  background: #5C90CD;
   filter: blur(20px);
   transform: translateX(-50%);
   animation: glow 3s ease-in-out infinite;
@@ -54,6 +72,7 @@
 
 /* waving arm */
 .dewy-arm--right {
+    translate: -40px 0;
     transform-box: fill-box;
     transform-origin: 10% 50%;
 }
@@ -142,3 +161,38 @@
   transition: opacity 80ms ease-out;
 }
 
+/* poke bounce and squish */
+
+.dewy-svg.is-poked {
+    animation: dewy-poke 800ms ease-out;
+}
+
+@keyframes dewy-poke {
+    0% {
+        transform: translateY(0) scale(1);
+    }
+
+    /* Squish down */
+    15% {
+        transform: translateY(30px) scale(1.18, 0.76);
+    }
+
+    /* Spring upwards */
+    38% {
+        transform: translateY(-63px) scale(0.94, 1.08);
+    }
+
+    /* Land and squash */
+    60% {
+        transform: translateY(10px) scale(1.08, 0.92);
+    }
+
+    /* Small second bounce */
+    78% {
+        transform: translateY(-20px) scale(0.90, 1.08);
+    }
+
+    100% {
+        transform: translateY(0) scale(1);
+    }
+}
