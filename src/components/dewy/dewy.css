@@ -15,6 +15,7 @@
     cursor: pointer;
     transform-origin: center;
     touch-action: none;
+    -webkit-tap-highlight-color: transparent;
     display: block;
     width: 100%;
     height: auto;
@@ -195,4 +196,21 @@
     100% {
         transform: translateY(0) scale(1);
     }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dewy,
+    .dewy-glow,
+    .dewy-svg.is-poked,
+    .dewy-arm--right.is-waving {
+        animation: none;
+    }
+
+    .dewy-eye,
+    .dewy-highlight,
+    .dewy-blush,
+    .dewy-expression {
+        transition: none;
+    }
+    
 }

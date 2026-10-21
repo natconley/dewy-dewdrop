@@ -27,7 +27,7 @@ function App() {
   return (
     <main className="app">
       <div className="dewy-wrapper">
-        <p className="dewy-hint">
+        <p className="dewy-hint" aria-live="polite" aria-atomic="true">
           {hint}
         </p>
         <Dewy onWave={() => setHasWaved(true)} onPoke={() => setHasPoked(true)} />

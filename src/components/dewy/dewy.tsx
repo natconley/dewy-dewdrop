@@ -31,6 +31,36 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
     const waveCooldown = useRef(0);
     const wavingRef = useRef(false);
     const wavingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const touchStart = useRef<{ x: number, y: number } | null>(null);
+    const wasSwiping = useRef(false);
+
+    const handleTouchStart = (e: React.PointerEvent<SVGSVGElement>) => {
+        if (e.pointerType !== "touch") return;
+
+        wasSwiping.current = false;
+
+        touchStart.current = {
+            x: e.clientX,
+            y: e.clientY,
+        };
+    };
+
+    const handleTouchEnd = (e: React.PointerEvent<SVGSVGElement>) => {
+        const start = touchStart.current;
+
+        if (e.pointerType !== "touch" || start === null) return;
+
+        const distance = Math.hypot(
+            e.clientX - start.x,
+            e.clientY - start.y
+        );
+
+        if (distance > 15) {
+            wasSwiping.current = true;
+        }
+
+        touchStart.current = null;
+    };
 
     // poking dewey
     const handlePoke = () => {
@@ -185,6 +215,10 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
             const dewy = document.querySelector(".dewy svg");
             if (!dewy) return;
 
+            if (event.pointerType === "touch" && event.buttons === 0) {
+                return;
+            }
+
             const rect = dewy.getBoundingClientRect();
 
             const centerX = rect.left + rect.width / 2;
@@ -219,7 +253,10 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
             // detect gestures before changing the gaze
             const waveRadius = 500;
 
-            if (distance < waveRadius) {
+            if (
+                (event.pointerType === "touch" && event.buttons > 0) ||
+                distance < waveRadius
+            ) {
                 detectWave(event.clientX);
             } else {
                 waveTracking.current = {
@@ -280,10 +317,30 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
             };
         };
 
+        const resetTouch = (event: PointerEvent) => {
+            if (event.pointerType !== "touch") return;
+
+            waveTracking.current = {
+                lastX: null,
+                direction: 0,
+                distanceInDirection: 0,
+                reversals: 0,
+                startedAt: 0,
+            };
+
+            lastPointer.current.time = 0;
+            targetGaze.current = { x: 0, y: 0 };
+            isEngaged.current = false;
+        };
+
         window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", resetTouch);
+        window.addEventListener("pointercancel", resetTouch);
 
         return () => {
             window.removeEventListener("pointermove", handlePointerMove);
+            window.addEventListener("pointerup", resetTouch);
+            window.addEventListener("pointercancel", resetTouch);
         };
     }, []);
 
@@ -331,7 +388,34 @@ export default function Dewy({onWave, onPoke}: DewyProps) {
   role="button"
   aria-label="Poke Dewy"
   tabIndex={0}
-  onClick={handlePoke}
+  onPointerDown={handleTouchStart}
+  onPointerMove={(e) => {
+    const start = touchStart.current;
+    if (e.pointerType !== "touch" || !start) return;
+
+    const distance = Math.hypot(
+        e.clientX - start.x,
+        e.clientY - start.y
+    );
+
+    if (distance > 15) {
+        wasSwiping.current = true;
+    }
+  }}
+  onPointerUp={handleTouchEnd}
+  onPointerCancel={() => {
+    touchStart.current = null;
+    wasSwiping.current = false;
+  }}
+  onClick={() => {
+    if (wasSwiping.current) {
+        wasSwiping.current = false;
+        return;
+    }
+
+    handlePoke();
+  }}
+
   onKeyDown={(e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
