@@ -3,6 +3,7 @@
   width: min(340px, 90vw);
   aspect-ratio: 340 / 360;
   margin: 0;
+  touch-action: none;
 }
 
 .dewy {
