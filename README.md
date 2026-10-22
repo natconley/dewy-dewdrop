@@ -1,75 +1,57 @@
-# React + TypeScript + Vite
+# Dewy the Dewdrop 💧
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A small, playful interaction experiment exploring how movement, gestures, and visual feedback can give a digital character personality.
 
-Currently, two official plugins are available:
+Dewy is a friendly little dewdrop who notices your presence, follows your pointer with his eyes, waves back when you wave at him, and reacts when you give him a poke.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**[Meet Dewy – Live Demo](https://dewy-dewdrop.vercel.app/)**
 
-## React Compiler
+## About the project
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Dewy started as a personal challenge: to create a small interactive experience that focuses on how an interface *feels*, rather than just how it looks.
 
-## Expanding the ESLint configuration
+The goal was to explore how simple interactions can make a digital character feel responsive, expressive, and a little more alive.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The project was designed and developed as a short, independent prototype using React, TypeScript, SVG, and CSS.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Interactions
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Eye tracking:** Dewy follows your pointer with his eyes, with smoothed movement for a more natural response.
+- **Wave detection:** Move your pointer from side to side, and Dewy might wave back!
+- **Click / tap reactions:** Give Dewy a poke and see how he responds.
+- **Blinking:** Occasional blinks add a little life even when you're not interacting.
+- **Responsive interaction:** Works with both mouse and touch input.
+- **Reduced motion:** Respects the user's reduced-motion preference.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Built with
 
+- React
+- TypeScript
+- SVG
+- CSS
+- Vite
+
+## Run locally
+
+Clone the repository and install the dependencies:
+
+```bash
+git clone https://github.com/natconley/dewy-dewdrop.git
+cd dewy-dewdrop
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Open the local URL shown in your terminal.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## What I wanted to explore
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+One of my favourite parts of interaction design is the relationship between the user and the interface: what happens when someone interacts with something, how the interface responds, and how those small details influence the overall experience.
 
-```
+With Dewy, I wanted to experiment with those details on a small scale. The focus is on responsive behaviour, subtle animation, and giving the user a sense that their actions matter.
+
+Dewy is an ongoing experiment, with room for more behaviours and interactions in the future.
+
+---
+
+Designed and developed by [Natalie Conley](https://natconley.github.io/portfolio/).
